@@ -215,14 +215,19 @@ export function RoomModal({ room, onClose, onRefresh }: RoomModalProps) {
   ]
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50 md:p-4" onClick={onClose}>
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-xl flex flex-col"
-        style={{ maxHeight: '90vh' }}
+        className="bg-white rounded-t-2xl md:rounded-2xl shadow-2xl w-full md:max-w-xl flex flex-col"
+        style={{ maxHeight: '92vh' }}
         onClick={e => e.stopPropagation()}
       >
+        {/* Drag handle — solo mobile */}
+        <div className="flex justify-center pt-2.5 pb-1 md:hidden">
+          <div className="w-10 h-1 bg-gray-300 rounded-full" />
+        </div>
+
         {/* Header */}
-        <div className={cn('flex items-center justify-between px-5 py-4 rounded-t-2xl border-b', cat.bg)}>
+        <div className={cn('flex items-center justify-between px-5 py-4 border-b', cat.bg)}>
           <div className="flex items-center gap-3">
             <div>
               <div className="flex items-center gap-2">

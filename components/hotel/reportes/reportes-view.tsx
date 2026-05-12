@@ -94,13 +94,13 @@ export default function ReportesView({
     .slice(0, 8)
 
   return (
-    <div className="p-6 space-y-6 pb-10">
+    <div className="p-4 md:p-6 space-y-5 md:space-y-6 pb-10">
       <div>
         <h1 className="text-xl font-bold text-gray-900">Reportes</h1>
         <p className="text-sm text-gray-400 mt-0.5">Análisis y métricas del Hotel Dionys</p>
       </div>
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 md:gap-4">
         <KPICard
           icon={<TrendingUp className="h-5 w-5 text-purple-500" />}
           label="Ocupación"

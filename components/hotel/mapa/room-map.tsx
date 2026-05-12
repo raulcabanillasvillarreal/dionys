@@ -99,49 +99,49 @@ export function RoomMap({ initialRooms }: RoomMapProps) {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Top header */}
-      <div className="px-6 pt-5 pb-3 border-b border-gray-100 bg-white shrink-0">
-        <div className="flex items-start justify-between gap-4">
+      <div className="px-4 md:px-6 pt-4 md:pt-5 pb-3 border-b border-gray-100 bg-white shrink-0">
+        <div className="flex items-center justify-between gap-2">
           <div>
-            <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-hotel" />
+            <h1 className="text-base md:text-xl font-bold text-gray-900 flex items-center gap-2">
+              <Building2 className="w-4 h-4 md:w-5 md:h-5 text-hotel" />
               Mapa de Habitaciones
             </h1>
-            <p className="text-sm text-gray-400 mt-0.5">Vista en tiempo real — Hotel Dionys, 5 pisos</p>
+            <p className="text-xs text-gray-400 mt-0.5 hidden sm:block">Vista en tiempo real — Hotel Dionys, 5 pisos</p>
           </div>
 
           {/* Global KPIs */}
-          <div className="flex gap-3 text-center">
-            <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-2">
-              <p className="text-xl font-bold text-green-700">{globalStats.available}</p>
-              <p className="text-[10px] text-green-600 font-medium uppercase tracking-wide">Disponibles</p>
+          <div className="flex gap-2 text-center">
+            <div className="bg-green-50 border border-green-200 rounded-xl px-2 md:px-4 py-1.5 md:py-2">
+              <p className="text-base md:text-xl font-bold text-green-700">{globalStats.available}</p>
+              <p className="text-[9px] md:text-[10px] text-green-600 font-medium uppercase tracking-wide">Libres</p>
             </div>
-            <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-2">
-              <p className="text-xl font-bold text-red-700">{globalStats.occupied}</p>
-              <p className="text-[10px] text-red-600 font-medium uppercase tracking-wide">Ocupadas</p>
+            <div className="bg-red-50 border border-red-200 rounded-xl px-2 md:px-4 py-1.5 md:py-2">
+              <p className="text-base md:text-xl font-bold text-red-700">{globalStats.occupied}</p>
+              <p className="text-[9px] md:text-[10px] text-red-600 font-medium uppercase tracking-wide">Ocup.</p>
             </div>
-            <div className="bg-orange-50 border border-orange-200 rounded-xl px-4 py-2">
-              <p className="text-xl font-bold text-orange-700">{globalStats.dirty}</p>
-              <p className="text-[10px] text-orange-600 font-medium uppercase tracking-wide">Atención</p>
+            <div className="bg-orange-50 border border-orange-200 rounded-xl px-2 md:px-4 py-1.5 md:py-2 hidden sm:block">
+              <p className="text-base md:text-xl font-bold text-orange-700">{globalStats.dirty}</p>
+              <p className="text-[9px] md:text-[10px] text-orange-600 font-medium uppercase tracking-wide">Atención</p>
             </div>
-            <div className="bg-hotel/10 border border-hotel/20 rounded-xl px-4 py-2">
-              <p className="text-xl font-bold text-hotel">{ocupacionPct}%</p>
-              <p className="text-[10px] text-hotel/70 font-medium uppercase tracking-wide">Ocupación</p>
+            <div className="bg-hotel/10 border border-hotel/20 rounded-xl px-2 md:px-4 py-1.5 md:py-2">
+              <p className="text-base md:text-xl font-bold text-hotel">{ocupacionPct}%</p>
+              <p className="text-[9px] md:text-[10px] text-hotel/70 font-medium uppercase tracking-wide">Ocup%</p>
             </div>
           </div>
         </div>
 
         {/* Floor tabs */}
-        <div className="flex gap-1.5 mt-4 overflow-x-auto pb-0.5">
+        <div className="flex gap-1.5 mt-3 overflow-x-auto pb-0.5 scrollbar-hide">
           <button
             onClick={() => setActiveFloor('all')}
             className={cn(
-              'px-4 py-1.5 rounded-full text-xs font-semibold border transition-all whitespace-nowrap',
+              'px-3 md:px-4 py-1.5 rounded-full text-xs font-semibold border transition-all whitespace-nowrap',
               activeFloor === 'all'
                 ? 'bg-hotel text-white border-hotel shadow-sm'
                 : 'bg-white text-gray-600 border-gray-200 hover:border-hotel hover:text-hotel'
             )}
           >
-            Todos los pisos
+            Todos
           </button>
           {floors.map(fl => {
             const flRooms = rooms.filter(r => getFloor(r) === fl)
@@ -151,13 +151,13 @@ export function RoomMap({ initialRooms }: RoomMapProps) {
                 key={fl}
                 onClick={() => setActiveFloor(fl)}
                 className={cn(
-                  'px-4 py-1.5 rounded-full text-xs font-semibold border transition-all whitespace-nowrap flex items-center gap-1.5',
+                  'px-3 md:px-4 py-1.5 rounded-full text-xs font-semibold border transition-all whitespace-nowrap flex items-center gap-1',
                   activeFloor === fl
                     ? 'bg-hotel text-white border-hotel shadow-sm'
                     : 'bg-white text-gray-600 border-gray-200 hover:border-hotel hover:text-hotel'
                 )}
               >
-                <span>Piso {fl}</span>
+                <span>P.{fl}</span>
                 {flStats.occupied > 0 && (
                   <span className={cn(
                     'text-[9px] font-bold px-1 py-0.5 rounded-full',
@@ -172,8 +172,8 @@ export function RoomMap({ initialRooms }: RoomMapProps) {
         </div>
       </div>
 
-      {/* Legend */}
-      <div className="flex items-center gap-4 px-6 py-2 bg-gray-50 border-b border-gray-100 shrink-0 overflow-x-auto">
+      {/* Legend — oculta en mobile, visible en desktop */}
+      <div className="hidden md:flex items-center gap-4 px-6 py-2 bg-gray-50 border-b border-gray-100 shrink-0 overflow-x-auto">
         <span className="text-[10px] text-gray-400 font-semibold uppercase tracking-wide whitespace-nowrap">Leyenda:</span>
         {STATUS_LEGEND.map(l => (
           <span key={l.label} className="flex items-center gap-1.5 whitespace-nowrap">
@@ -192,7 +192,7 @@ export function RoomMap({ initialRooms }: RoomMapProps) {
       </div>
 
       {/* Room grid scrollable area */}
-      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
+      <div className="flex-1 overflow-y-auto px-3 md:px-6 py-4 space-y-6">
         {sortedFloorKeys.length === 0 && (
           <div className="text-center py-20 text-gray-400 text-sm">
             No hay habitaciones registradas. Ejecuta la migración 00010 para cargar las habitaciones.
@@ -221,7 +221,7 @@ export function RoomMap({ initialRooms }: RoomMapProps) {
               </div>
 
               {/* Rooms grid */}
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-9 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-9 gap-2 md:gap-2">
                 {flRooms.map(room => (
                   <RoomCard key={room.id} room={room} onClick={setSelectedRoom} />
                 ))}
