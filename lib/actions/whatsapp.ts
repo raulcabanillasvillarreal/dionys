@@ -70,6 +70,20 @@ export async function sendMessage(conversationId: string, text: string) {
     .update({ last_message: text, last_message_at: new Date().toISOString() })
     .eq('id', conversationId)
 
+  // Auto-reply simulation — always responds "xd"
+  await supabase.from('wa_messages').insert({
+    conversation_id: conversationId,
+    direction: 'inbound',
+    type: 'text',
+    content: 'xd',
+    status: 'delivered',
+    sent_at: new Date(Date.now() + 1000).toISOString(),
+  })
+  await supabase
+    .from('wa_conversations')
+    .update({ last_message: 'xd', last_message_at: new Date(Date.now() + 1000).toISOString(), unread_count: 1 })
+    .eq('id', conversationId)
+
   revalidatePath('/hotel/inbox')
   return { ok: true }
 }

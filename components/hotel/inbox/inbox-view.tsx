@@ -8,7 +8,7 @@ import { getMessages, markAsRead } from '@/lib/actions/whatsapp'
 import { createClient } from '@/lib/supabase/client'
 import { MessageSquare } from 'lucide-react'
 
-export type Channel = 'all' | 'whatsapp' | 'instagram' | 'email'
+export type Channel = 'all' | 'whatsapp' | 'instagram' | 'email' | 'facebook'
 
 export interface Conversation {
   id: string
@@ -52,12 +52,14 @@ export const CHANNEL_CONFIG = {
   whatsapp: { label: 'WhatsApp', color: '#25D366', bg: 'bg-green-500', light: 'bg-green-50 text-green-700', dot: 'bg-green-400' },
   instagram: { label: 'Instagram', color: '#E1306C', bg: 'bg-pink-500', light: 'bg-pink-50 text-pink-700', dot: 'bg-pink-400' },
   email: { label: 'Email', color: '#1a4e8a', bg: 'bg-blue-600', light: 'bg-blue-50 text-blue-700', dot: 'bg-blue-400' },
+  facebook: { label: 'Facebook', color: '#1877F2', bg: 'bg-blue-500', light: 'bg-blue-50 text-blue-700', dot: 'bg-blue-400' },
 } as const
 
 const CHANNEL_TABS: { value: Channel; label: string }[] = [
   { value: 'all', label: 'Todo' },
   { value: 'whatsapp', label: 'WhatsApp' },
   { value: 'instagram', label: 'Instagram' },
+  { value: 'facebook', label: 'Facebook' },
   { value: 'email', label: 'Email' },
 ]
 
@@ -192,7 +194,7 @@ export function InboxView({ initialConversations, templates }: InboxViewProps) {
             conversationId={selectedConv.id}
             contactName={selectedConv.contact_name}
             phone={selectedConv.phone}
-            channel={(selectedConv.channel ?? 'whatsapp') as 'whatsapp' | 'instagram' | 'email'}
+            channel={(selectedConv.channel ?? 'whatsapp') as 'whatsapp' | 'instagram' | 'email' | 'facebook'}
             emailSubject={selectedConv.email_subject}
             initialMessages={messages}
             templates={templates}
@@ -223,7 +225,7 @@ function EmptyState() {
         <p className="text-base font-semibold text-gray-700">Tus mensajes</p>
         <p className="text-sm text-gray-400 mt-1">Selecciona una conversación para comenzar</p>
         <div className="flex items-center justify-center gap-3 mt-4">
-          {(['whatsapp', 'instagram', 'email'] as const).map(ch => (
+          {(['whatsapp', 'instagram', 'facebook', 'email'] as const).map(ch => (
             <span key={ch} className={`text-xs px-3 py-1.5 rounded-full font-medium ${CHANNEL_CONFIG[ch].light}`}>
               {CHANNEL_CONFIG[ch].label}
             </span>

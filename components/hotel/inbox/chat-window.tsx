@@ -12,7 +12,7 @@ interface ChatWindowProps {
   conversationId: string
   contactName: string | null
   phone: string
-  channel: 'whatsapp' | 'instagram' | 'email'
+  channel: 'whatsapp' | 'instagram' | 'email' | 'facebook'
   emailSubject?: string | null
   initialMessages: Message[]
   templates: Template[]
