@@ -6,10 +6,11 @@ import { ChatWindow } from './chat-window'
 import { ContactInfoPanel } from './contact-info-panel'
 import { getMessages, markAsRead } from '@/lib/actions/whatsapp'
 import { createClient } from '@/lib/supabase/client'
+import { MessageSquare } from 'lucide-react'
 
-type Channel = 'all' | 'whatsapp' | 'instagram' | 'email'
+export type Channel = 'all' | 'whatsapp' | 'instagram' | 'email'
 
-interface Conversation {
+export interface Conversation {
   id: string
   phone: string
   contact_name: string | null
@@ -23,7 +24,7 @@ interface Conversation {
   email_subject: string | null
 }
 
-interface Message {
+export interface Message {
   id: string
   conversation_id: string
   direction: 'inbound' | 'outbound'
@@ -35,7 +36,7 @@ interface Message {
   template_name: string | null
 }
 
-interface Template {
+export interface Template {
   id: string
   name: string
   body: string
@@ -47,11 +48,17 @@ interface InboxViewProps {
   templates: Template[]
 }
 
-const CHANNEL_TABS: { value: Channel; label: string; icon: string }[] = [
-  { value: 'all', label: 'Todo', icon: '💬' },
-  { value: 'whatsapp', label: 'WhatsApp', icon: '📱' },
-  { value: 'instagram', label: 'Instagram', icon: '📷' },
-  { value: 'email', label: 'Email', icon: '✉️' },
+export const CHANNEL_CONFIG = {
+  whatsapp: { label: 'WhatsApp', color: '#25D366', bg: 'bg-green-500', light: 'bg-green-50 text-green-700', dot: 'bg-green-400' },
+  instagram: { label: 'Instagram', color: '#E1306C', bg: 'bg-pink-500', light: 'bg-pink-50 text-pink-700', dot: 'bg-pink-400' },
+  email: { label: 'Email', color: '#1a4e8a', bg: 'bg-blue-600', light: 'bg-blue-50 text-blue-700', dot: 'bg-blue-400' },
+} as const
+
+const CHANNEL_TABS: { value: Channel; label: string }[] = [
+  { value: 'all', label: 'Todo' },
+  { value: 'whatsapp', label: 'WhatsApp' },
+  { value: 'instagram', label: 'Instagram' },
+  { value: 'email', label: 'Email' },
 ]
 
 export function InboxView({ initialConversations, templates }: InboxViewProps) {
@@ -59,15 +66,26 @@ export function InboxView({ initialConversations, templates }: InboxViewProps) {
   const [channel, setChannel] = useState<Channel>('all')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
+  const [search, setSearch] = useState('')
+  const [showChat, setShowChat] = useState(false) // mobile toggle
   const [, startTransition] = useTransition()
 
-  const filtered = channel === 'all' ? conversations : conversations.filter(c => c.channel === channel)
+  const filtered = conversations
+    .filter(c => channel === 'all' || c.channel === channel)
+    .filter(c => {
+      if (!search) return true
+      const q = search.toLowerCase()
+      return (
+        (c.contact_name ?? '').toLowerCase().includes(q) ||
+        c.phone.includes(q) ||
+        (c.last_message ?? '').toLowerCase().includes(q)
+      )
+    })
+
   const selectedConv = conversations.find(c => c.id === selectedId) ?? null
 
   const unreadByChannel = (ch: Channel) =>
-    conversations
-      .filter(c => ch === 'all' || c.channel === ch)
-      .reduce((s, c) => s + (c.unread_count ?? 0), 0)
+    conversations.filter(c => ch === 'all' || c.channel === ch).reduce((s, c) => s + (c.unread_count ?? 0), 0)
 
   useEffect(() => {
     const supabase = createClient()
@@ -84,7 +102,7 @@ export function InboxView({ initialConversations, templates }: InboxViewProps) {
                 if (!a.last_message_at) return 1
                 if (!b.last_message_at) return -1
                 return new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
-              }),
+              })
           )
         }
       })
@@ -94,6 +112,7 @@ export function InboxView({ initialConversations, templates }: InboxViewProps) {
 
   async function handleSelect(id: string) {
     setSelectedId(id)
+    setShowChat(true)
     const msgs = await getMessages(id)
     setMessages(msgs as Message[])
     startTransition(() => { markAsRead(id) })
@@ -101,32 +120,55 @@ export function InboxView({ initialConversations, templates }: InboxViewProps) {
   }
 
   return (
-    <div className="flex h-full overflow-hidden">
-      {/* Left panel */}
-      <div className="w-72 shrink-0 bg-white border-r border-gray-200 flex flex-col">
+    <div className="flex h-full overflow-hidden bg-gray-100">
+      {/* ── Lista de conversaciones ── */}
+      <div className={`
+        w-full md:w-80 lg:w-96 shrink-0 flex flex-col bg-white border-r border-gray-200
+        ${showChat ? 'hidden md:flex' : 'flex'}
+      `}>
         {/* Header */}
-        <div className="px-4 pt-4 pb-2 border-b border-gray-100">
-          <h2 className="text-sm font-bold text-gray-900">Inbox</h2>
+        <div className="px-4 pt-5 pb-3 bg-white">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-xl font-bold text-gray-900">Mensajes</h1>
+            <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full font-medium">
+              {conversations.filter(c => c.unread_count > 0).length} sin leer
+            </span>
+          </div>
+          {/* Search */}
+          <div className="relative">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Buscar..."
+              className="w-full pl-9 pr-4 py-2.5 bg-gray-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-hotel/30 focus:bg-white transition-all placeholder-gray-400"
+            />
+          </div>
         </div>
 
         {/* Channel tabs */}
-        <div className="flex border-b border-gray-100 px-2 pt-1 gap-0.5 shrink-0">
+        <div className="flex px-3 gap-1 pb-3 overflow-x-auto scrollbar-hide">
           {CHANNEL_TABS.map(tab => {
             const count = unreadByChannel(tab.value)
+            const active = channel === tab.value
             return (
               <button
                 key={tab.value}
                 onClick={() => setChannel(tab.value)}
-                className={`flex items-center gap-1 px-2.5 py-2 text-xs font-medium rounded-t-lg transition-colors relative ${
-                  channel === tab.value
-                    ? 'text-hotel border-b-2 border-hotel bg-hotel/5'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                  active
+                    ? 'bg-hotel text-white shadow-sm'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                <span>{tab.icon}</span>
-                <span>{tab.label}</span>
+                {tab.value !== 'all' && (
+                  <span className={`w-2 h-2 rounded-full ${CHANNEL_CONFIG[tab.value as keyof typeof CHANNEL_CONFIG]?.dot ?? 'bg-gray-400'}`} />
+                )}
+                {tab.label}
                 {count > 0 && (
-                  <span className="ml-0.5 min-w-[16px] h-4 bg-red-500 text-white text-[9px] rounded-full flex items-center justify-center font-bold px-0.5">
+                  <span className={`min-w-[16px] h-4 rounded-full text-[9px] flex items-center justify-center font-bold px-0.5 ${
+                    active ? 'bg-white/30 text-white' : 'bg-red-500 text-white'
+                  }`}>
                     {count > 9 ? '9+' : count}
                   </span>
                 )}
@@ -142,8 +184,8 @@ export function InboxView({ initialConversations, templates }: InboxViewProps) {
         />
       </div>
 
-      {/* Chat */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      {/* ── Chat ── */}
+      <div className={`flex-1 flex flex-col overflow-hidden ${showChat ? 'flex' : 'hidden md:flex'}`}>
         {selectedConv ? (
           <ChatWindow
             key={selectedConv.id}
@@ -154,15 +196,16 @@ export function InboxView({ initialConversations, templates }: InboxViewProps) {
             emailSubject={selectedConv.email_subject}
             initialMessages={messages}
             templates={templates}
+            onBack={() => setShowChat(false)}
           />
         ) : (
           <EmptyState />
         )}
       </div>
 
-      {/* Contact info */}
+      {/* ── Panel lateral ── */}
       {selectedConv && (
-        <div className="w-64 shrink-0 hidden lg:flex flex-col">
+        <div className="w-72 shrink-0 hidden xl:flex flex-col">
           <ContactInfoPanel conversation={selectedConv} />
         </div>
       )}
@@ -172,15 +215,20 @@ export function InboxView({ initialConversations, templates }: InboxViewProps) {
 
 function EmptyState() {
   return (
-    <div className="flex-1 flex items-center justify-center text-gray-400">
+    <div className="flex-1 flex items-center justify-center bg-gray-50">
       <div className="text-center">
-        <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
+        <div className="w-20 h-20 rounded-full bg-hotel/10 flex items-center justify-center mx-auto mb-4">
+          <MessageSquare className="w-9 h-9 text-hotel/60" />
         </div>
-        <p className="text-sm font-medium text-gray-500">Selecciona una conversación</p>
-        <p className="text-xs text-gray-400 mt-1">WhatsApp · Instagram · Email</p>
+        <p className="text-base font-semibold text-gray-700">Tus mensajes</p>
+        <p className="text-sm text-gray-400 mt-1">Selecciona una conversación para comenzar</p>
+        <div className="flex items-center justify-center gap-3 mt-4">
+          {(['whatsapp', 'instagram', 'email'] as const).map(ch => (
+            <span key={ch} className={`text-xs px-3 py-1.5 rounded-full font-medium ${CHANNEL_CONFIG[ch].light}`}>
+              {CHANNEL_CONFIG[ch].label}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   )
