@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useRef, KeyboardEvent } from 'react'
-import { X, Plus, User, Phone, Mail, BedDouble, Calendar, Tag, Zap } from 'lucide-react'
+import { useState, useRef, KeyboardEvent, useEffect } from 'react'
+import { X, Plus, User, Phone, Mail, BedDouble, Calendar, Tag, Zap, Moon } from 'lucide-react'
 import { createLead } from '@/lib/actions/hotel-crm'
 import type { StageWithLeads, Lead } from '@/types/hotel-crm'
 
@@ -22,7 +22,23 @@ export function AddLeadDialog({ open, onClose, onLeadCreated, stages, defaultSta
   const [error, setError] = useState<string | null>(null)
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState('')
+  const [checkIn, setCheckIn] = useState('')
+  const [checkOut, setCheckOut] = useState('')
+  const [selectedRoomId, setSelectedRoomId] = useState('')
+  const [amount, setAmount] = useState('')
   const formRef = useRef<HTMLFormElement>(null)
+
+  // Calcular noches y monto automáticamente
+  const selectedRoom = availableRooms.find(r => r.id === selectedRoomId)
+  const nights =
+    checkIn && checkOut
+      ? Math.max(0, Math.round((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / 86400000))
+      : 0
+  const calculatedAmount = nights > 0 && selectedRoom ? nights * selectedRoom.price_per_night : null
+
+  useEffect(() => {
+    if (calculatedAmount !== null) setAmount(calculatedAmount.toFixed(2))
+  }, [calculatedAmount])
 
   function addTag(tag: string) {
     const t = tag.trim()
@@ -56,6 +72,10 @@ export function AddLeadDialog({ open, onClose, onLeadCreated, stages, defaultSta
     } else if (result?.lead) {
       setTags([])
       setTagInput('')
+      setCheckIn('')
+      setCheckOut('')
+      setSelectedRoomId('')
+      setAmount('')
       formRef.current?.reset()
       onLeadCreated(result.lead as Lead)
       onClose()
@@ -69,6 +89,10 @@ export function AddLeadDialog({ open, onClose, onLeadCreated, stages, defaultSta
   function handleClose() {
     setTags([])
     setTagInput('')
+    setCheckIn('')
+    setCheckOut('')
+    setSelectedRoomId('')
+    setAmount('')
     setError(null)
     onClose()
   }
@@ -159,28 +183,68 @@ export function AddLeadDialog({ open, onClose, onLeadCreated, stages, defaultSta
                   <label className={lbl}>
                     <Calendar size={11} className="inline mr-1 text-gray-400" />Check-in
                   </label>
-                  <input name="check_in" type="date" className={inp} />
+                  <input
+                    name="check_in"
+                    type="date"
+                    value={checkIn}
+                    onChange={e => setCheckIn(e.target.value)}
+                    className={inp}
+                  />
                 </div>
                 <div>
                   <label className={lbl}>
                     <Calendar size={11} className="inline mr-1 text-gray-400" />Check-out
                   </label>
-                  <input name="check_out" type="date" className={inp} />
+                  <input
+                    name="check_out"
+                    type="date"
+                    value={checkOut}
+                    min={checkIn}
+                    onChange={e => setCheckOut(e.target.value)}
+                    className={inp}
+                  />
                 </div>
                 <div>
                   <label className={lbl}>Habitación</label>
-                  <select name="room_id" className={inp}>
+                  <select
+                    name="room_id"
+                    value={selectedRoomId}
+                    onChange={e => setSelectedRoomId(e.target.value)}
+                    className={inp}
+                  >
                     <option value="">— Sin asignar —</option>
                     {availableRooms.map(r => (
                       <option key={r.id} value={r.id}>
-                        {r.number} · {r.type} · S/{r.price_per_night}
+                        {r.number} · {r.type} · S/{r.price_per_night}/noche
                       </option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className={lbl}>Monto estimado (S/)</label>
-                  <input name="amount" type="number" step="0.01" min="0" placeholder="0.00" className={inp} />
+                  <label className={lbl}>Monto total (S/)</label>
+                  <input
+                    name="amount"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={amount}
+                    onChange={e => setAmount(e.target.value)}
+                    placeholder="0.00"
+                    className={inp}
+                  />
+                  {/* Desglose del cálculo */}
+                  {nights > 0 && selectedRoom && (
+                    <p className="flex items-center gap-1.5 text-[11px] text-hotel font-semibold mt-1.5">
+                      <Moon size={11} />
+                      {nights} noche{nights !== 1 ? 's' : ''} × S/{selectedRoom.price_per_night} = S/{(nights * selectedRoom.price_per_night).toFixed(2)}
+                    </p>
+                  )}
+                  {nights > 0 && !selectedRoom && (
+                    <p className="text-[11px] text-gray-400 mt-1.5">{nights} noche{nights !== 1 ? 's' : ''} — selecciona una habitación para calcular</p>
+                  )}
+                  {checkIn && checkOut && nights === 0 && (
+                    <p className="text-[11px] text-red-500 mt-1.5">El check-out debe ser posterior al check-in</p>
+                  )}
                 </div>
               </div>
             </fieldset>
