@@ -94,7 +94,7 @@ export default function ReportesView({
     .slice(0, 8)
 
   return (
-    <div className="p-4 md:p-6 space-y-5 md:space-y-6 pb-10">
+    <div className="p-4 md:p-6 space-y-5 md:space-y-6 pb-10 animate-fade-in">
       <div>
         <h1 className="text-xl font-bold text-gray-900">Reportes</h1>
         <p className="text-sm text-gray-400 mt-0.5">Análisis y métricas del Hotel Dionys</p>

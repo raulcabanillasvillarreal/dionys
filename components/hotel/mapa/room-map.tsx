@@ -97,7 +97,7 @@ export function RoomMap({ initialRooms }: RoomMapProps) {
   const ocupacionPct = rooms.length > 0 ? Math.round((globalStats.occupied / rooms.length) * 100) : 0
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col h-full overflow-hidden animate-fade-in">
       {/* Top header */}
       <div className="px-4 md:px-6 pt-4 md:pt-5 pb-3 border-b border-gray-100 bg-white shrink-0">
         <div className="flex items-center justify-between gap-2">

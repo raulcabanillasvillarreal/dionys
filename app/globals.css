@@ -2,6 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Base layer overrides ──────────────────────────────────── */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Focus ring global */
+  :focus-visible {
+    outline: 2px solid #1a4e8a;
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+}
+
+/* ─── Custom scrollbar (desktop) ────────────────────────────── */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* ─── Utility classes ───────────────────────────────────────── */
 @layer utilities {
   /* Safe area para notch/dynamic island en iOS */
   .safe-area-bottom {
@@ -16,9 +53,58 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  /* Skeleton shimmer */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      #f3f4f6 25%,
+      #e9eaed 50%,
+      #f3f4f6 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.6s ease-in-out infinite;
+    border-radius: 0.5rem;
+  }
+
+  /* Page content entrance */
+  .page-enter {
+    animation: slideUp 0.28s ease-out both, fadeIn 0.28s ease-out both;
+  }
+
+  /* Glass effect */
+  .glass {
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    background: rgb(255 255 255 / 0.85);
+  }
+
+  /* Gradient text */
+  .text-gradient-hotel {
+    background: linear-gradient(135deg, #1a4e8a, #2563eb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 }
 
-/* Previene zoom en inputs en iOS */
+/* ─── Keyframes (referenced by tailwind + .skeleton) ────────── */
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── iOS input zoom prevention ─────────────────────────────── */
 @media screen and (max-width: 768px) {
   input[type="text"],
   input[type="number"],
@@ -27,5 +113,12 @@
   select,
   textarea {
     font-size: 16px !important;
+  }
+}
+
+/* ─── Smooth page transitions ───────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  .transition-page {
+    transition: opacity 0.2s ease, transform 0.2s ease;
   }
 }

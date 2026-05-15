@@ -39,26 +39,30 @@ export function MobileNav({ unreadCount = 0 }: { unreadCount?: number }) {
 
   return (
     <>
-      {/* More drawer */}
+      {/* Drawer backdrop */}
       {open && (
         <div
-          className="fixed inset-0 z-[60] bg-black/60 md:hidden"
+          className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm md:hidden"
           onClick={() => setOpen(false)}
         >
           <div
-            className="absolute bottom-16 inset-x-0 bg-white rounded-t-2xl px-4 pt-4 pb-6 shadow-2xl"
+            className="absolute bottom-16 inset-x-0 bg-white rounded-t-3xl px-4 pt-4 pb-6 shadow-2xl animate-slide-up"
             onClick={e => e.stopPropagation()}
           >
+            {/* Drag handle */}
+            <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
+
             <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-bold text-gray-800">Más módulos</span>
+              <span className="text-sm font-bold text-gray-900">Más módulos</span>
               <button
                 onClick={() => setOpen(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100"
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 active:bg-gray-200 transition-colors"
               >
                 <X className="w-4 h-4 text-gray-500" />
               </button>
             </div>
-            <div className="grid grid-cols-4 gap-3">
+
+            <div className="grid grid-cols-4 gap-2.5">
               {MORE.map(({ href, icon: Icon, label }) => {
                 const active = pathname.startsWith(href)
                 return (
@@ -67,8 +71,10 @@ export function MobileNav({ unreadCount = 0 }: { unreadCount?: number }) {
                     href={href}
                     onClick={() => setOpen(false)}
                     className={cn(
-                      'flex flex-col items-center gap-1.5 p-3 rounded-xl transition-colors',
-                      active ? 'bg-hotel/10 text-hotel' : 'bg-gray-50 text-gray-600 active:bg-gray-100'
+                      'flex flex-col items-center gap-1.5 p-3 rounded-2xl transition-all active:scale-95',
+                      active
+                        ? 'bg-hotel text-white shadow-md shadow-hotel/25'
+                        : 'bg-gray-50 text-gray-600 active:bg-gray-100'
                     )}
                   >
                     <Icon size={20} strokeWidth={active ? 2.5 : 2} />
@@ -79,7 +85,7 @@ export function MobileNav({ unreadCount = 0 }: { unreadCount?: number }) {
               <Link
                 href="/"
                 onClick={() => setOpen(false)}
-                className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gray-50 text-gray-400 active:bg-gray-100"
+                className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-gray-50 text-gray-400 active:bg-gray-100 active:scale-95 transition-all"
               >
                 <ArrowLeft size={20} strokeWidth={2} />
                 <span className="text-[10px] font-medium text-center leading-tight">Salir</span>
@@ -90,7 +96,7 @@ export function MobileNav({ unreadCount = 0 }: { unreadCount?: number }) {
       )}
 
       {/* Bottom nav bar */}
-      <nav className="fixed bottom-0 inset-x-0 z-50 bg-slate-900 border-t border-slate-800 md:hidden safe-area-bottom">
+      <nav className="fixed bottom-0 inset-x-0 z-50 bg-gradient-to-t from-slate-950 to-slate-900 border-t border-white/5 md:hidden safe-area-bottom">
         <div className="flex items-center justify-around h-16 px-1">
           {MAIN.map(({ href, icon: Icon, label, exact }) => {
             const active = exact ? pathname === href : pathname.startsWith(href)
@@ -100,37 +106,52 @@ export function MobileNav({ unreadCount = 0 }: { unreadCount?: number }) {
                 key={href}
                 href={href}
                 className={cn(
-                  'relative flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-colors min-w-0',
-                  active ? 'text-white' : 'text-slate-400 active:text-white'
+                  'relative flex flex-col items-center gap-0.5 px-4 py-2 rounded-2xl transition-all active:scale-90 min-w-0',
+                  active ? 'text-white' : 'text-slate-500 active:text-white'
                 )}
               >
                 {active && (
-                  <span className="absolute inset-0 bg-hotel/30 rounded-xl" />
+                  <span className="absolute inset-0 bg-hotel/25 rounded-2xl animate-scale-in" />
                 )}
-                <Icon size={20} strokeWidth={active ? 2.5 : 2} />
-                <span className="text-[10px] font-medium relative z-10">{label}</span>
-                {isInbox && unreadCount > 0 && (
-                  <span className="absolute top-1.5 right-2.5 min-w-[14px] h-3.5 bg-red-500 rounded-full text-white text-[8px] flex items-center justify-center font-bold px-0.5">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
+                <div className={cn(
+                  'relative transition-transform duration-150',
+                  active && 'scale-110'
+                )}>
+                  <Icon size={21} strokeWidth={active ? 2.5 : 2} />
+                  {isInbox && unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 bg-red-500 rounded-full text-white text-[8px] flex items-center justify-center font-bold px-0.5 shadow-sm animate-bounce-in">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </div>
+                <span className={cn(
+                  'text-[10px] font-semibold relative z-10 transition-all duration-150',
+                  active ? 'text-white' : 'text-slate-500'
+                )}>
+                  {label}
+                </span>
               </Link>
             )
           })}
 
           {/* More button */}
           <button
-            onClick={() => setOpen(true)}
+            onClick={() => setOpen(v => !v)}
             className={cn(
-              'relative flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-colors min-w-0',
-              isMoreActive ? 'text-white' : 'text-slate-400 active:text-white'
+              'relative flex flex-col items-center gap-0.5 px-4 py-2 rounded-2xl transition-all active:scale-90 min-w-0',
+              isMoreActive ? 'text-white' : 'text-slate-500 active:text-white'
             )}
           >
             {isMoreActive && (
-              <span className="absolute inset-0 bg-hotel/30 rounded-xl" />
+              <span className="absolute inset-0 bg-hotel/25 rounded-2xl animate-scale-in" />
             )}
-            <MoreHorizontal size={20} strokeWidth={2} />
-            <span className="text-[10px] font-medium relative z-10">Más</span>
+            <MoreHorizontal size={21} strokeWidth={open ? 2.5 : 2} className="relative transition-transform duration-200" style={{ transform: open ? 'rotate(90deg)' : 'none' }} />
+            <span className={cn(
+              'text-[10px] font-semibold relative z-10 transition-all duration-150',
+              isMoreActive ? 'text-white' : 'text-slate-500'
+            )}>
+              Más
+            </span>
           </button>
         </div>
       </nav>

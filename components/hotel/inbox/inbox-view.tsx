@@ -122,7 +122,7 @@ export function InboxView({ initialConversations, templates }: InboxViewProps) {
   }
 
   return (
-    <div className="flex h-full overflow-hidden bg-gray-100">
+    <div className="flex h-full overflow-hidden bg-gray-100 animate-fade-in">
       {/* ── Lista de conversaciones ── */}
       <div className={`
         w-full md:w-80 lg:w-96 shrink-0 flex flex-col bg-white border-r border-gray-200
