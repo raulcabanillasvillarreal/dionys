@@ -89,7 +89,7 @@ export function ContactInfoPanel({ conversation }: { conversation: Conversation 
         {/* Lead link */}
         {conversation.lead_id && (
           <a
-            href={`/hotel?lead=${conversation.lead_id}`}
+            href={`/hotel/pipeline?lead=${conversation.lead_id}`}
             className="flex items-center gap-2.5 w-full px-3 py-2.5 bg-hotel/5 border border-hotel/20 rounded-xl text-sm text-hotel hover:bg-hotel/10 transition-colors group"
           >
             <ExternalLink size={14} className="shrink-0" />

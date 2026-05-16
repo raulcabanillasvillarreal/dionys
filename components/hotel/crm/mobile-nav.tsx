@@ -11,13 +11,14 @@ import {
 import { cn } from '@/lib/utils'
 
 const MAIN = [
-  { href: '/hotel', icon: LayoutGrid, label: 'Pipeline', exact: true },
+  { href: '/hotel/pipeline', icon: LayoutGrid, label: 'Pipeline' },
   { href: '/hotel/mapa', icon: BedDouble, label: 'Mapa' },
   { href: '/hotel/inbox', icon: MessageSquare, label: 'Inbox' },
   { href: '/hotel/caja', icon: DollarSign, label: 'Caja' },
 ]
 
 const MORE = [
+  { href: '/hotel', icon: LayoutGrid, label: 'Inicio' },
   { href: '/hotel/planning', icon: CalendarDays, label: 'Planning' },
   { href: '/hotel/pos', icon: ShoppingCart, label: 'POS' },
   { href: '/hotel/contactos', icon: Users, label: 'Contactos' },
@@ -98,8 +99,8 @@ export function MobileNav({ unreadCount = 0 }: { unreadCount?: number }) {
       {/* Bottom nav bar */}
       <nav className="fixed bottom-0 inset-x-0 z-50 bg-gradient-to-t from-slate-950 to-slate-900 border-t border-white/5 md:hidden safe-area-bottom">
         <div className="flex items-center justify-around h-16 px-1">
-          {MAIN.map(({ href, icon: Icon, label, exact }) => {
-            const active = exact ? pathname === href : pathname.startsWith(href)
+          {MAIN.map(({ href, icon: Icon, label }) => {
+            const active = pathname.startsWith(href)
             const isInbox = href === '/hotel/inbox'
             return (
               <Link
